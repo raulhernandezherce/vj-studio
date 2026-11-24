@@ -13,10 +13,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 24
-      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      # Las pruebas del motor usan cabeceras POSIX y de macOS (unistd.h, CoreMIDI, arpa/inet.h):
+      # en Windows se compila el motor y el programa, sin pruebas, hasta portarlas.
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DVJ_BUILD_TESTS=OFF
       - run: cmake --build build --config Release --parallel
-      # Sin pantalla física: lo que dependa de OpenGL se omite solo.
-      - run: ctest --test-dir build -C Release --output-on-failure --timeout 180
       - run: npm ci
         working-directory: ui
       - run: npm test
