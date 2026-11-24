@@ -1,0 +1,1853 @@
+{
+ "$comment": "Catálogo como datos. P(i) es el parámetro i; src(uv) lee la entrada; uTime y uBeat, el reloj; uSize, la resolución. El manual no publica el catálogo ni las fórmulas: nombres y cálculos son propios.",
+ "effects": [
+  {
+   "id": "transform",
+   "name": "Transform",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "x",
+     "label": "Posición X",
+     "min": -1,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "y",
+     "label": "Posición Y",
+     "min": -1,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "scale",
+     "label": "Escala",
+     "min": 0.05,
+     "max": 5,
+     "default": 1
+    },
+    {
+     "name": "rotation",
+     "label": "Rotación",
+     "min": -360,
+     "max": 360,
+     "default": 0
+    }
+   ],
+   "glsl": "vec2 q = (uv - 0.5 - vec2(P(0), -P(1))) * uSize; float a = radians(P(3)); q = mat2(cos(a), sin(a), -sin(a), cos(a)) * q; q = q / P(2) / uSize + 0.5; return (q.x < 0.0 || q.x > 1.0 || q.y < 0.0 || q.y > 1.0) ? vec4(0.0) : src(q);"
+  },
+  {
+   "id": "brightness-contrast",
+   "name": "Brillo y contraste",
+   "category": "Color",
+   "params": [
+    {
+     "name": "brightness",
+     "label": "Brillo",
+     "min": -1,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "contrast",
+     "label": "Contraste",
+     "min": 0,
+     "max": 3,
+     "default": 1
+    }
+   ],
+   "glsl": "vec4 c = src(uv); vec3 k = unpre(c); k = (k - 0.5) * P(1) + 0.5 + P(0); return pre(k, c.a);"
+  },
+  {
+   "id": "hue",
+   "name": "Tono",
+   "category": "Color",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Giro",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   ],
+   "glsl": "vec4 c = src(uv); vec3 k = unpre(c); float a = P(0) * 6.28318; vec3 u = vec3(0.57735); k = k * cos(a) + cross(u, k) * sin(a) + u * dot(u, k) * (1.0 - cos(a)); return pre(k, c.a);"
+  },
+  {
+   "id": "saturation",
+   "name": "Saturación",
+   "category": "Color",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Saturación",
+     "min": 0,
+     "max": 3,
+     "default": 1
+    }
+   ],
+   "glsl": "vec4 c = src(uv); vec3 k = unpre(c); return pre(mix(vec3(dot(k, LUMA)), k, P(0)), c.a);"
+  },
+  {
+   "id": "invert",
+   "name": "Invertir",
+   "category": "Color",
+   "params": [
+    {
+     "name": "red",
+     "label": "Rojo",
+     "type": "bool",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "green",
+     "label": "Verde",
+     "type": "bool",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "blue",
+     "label": "Azul",
+     "type": "bool",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    }
+   ],
+   "glsl": "vec4 c = src(uv); vec3 k = unpre(c); vec3 m = vec3(P(0), P(1), P(2)); return pre(mix(k, 1.0 - k, m), c.a);"
+  },
+  {
+   "id": "threshold",
+   "name": "Umbral",
+   "category": "Color",
+   "params": [
+    {
+     "name": "level",
+     "label": "Nivel",
+     "min": 0,
+     "max": 1,
+     "default": 0.5
+    }
+   ],
+   "glsl": "vec4 c = src(uv); return pre(vec3(step(P(0), dot(unpre(c), LUMA))), c.a);"
+  },
+  {
+   "id": "posterize",
+   "name": "Posterizar",
+   "category": "Color",
+   "params": [
+    {
+     "name": "levels",
+     "label": "Niveles",
+     "min": 2,
+     "max": 32,
+     "default": 6
+    }
+   ],
+   "glsl": "vec4 c = src(uv); float n = floor(P(0)); return pre(floor(unpre(c) * n) / (n - 1.0), c.a);"
+  },
+  {
+   "id": "colorize",
+   "name": "Colorear",
+   "category": "Color",
+   "params": [
+    {
+     "name": "r",
+     "label": "Rojo",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "g",
+     "label": "Verde",
+     "min": 0,
+     "max": 1,
+     "default": 0.6
+    },
+    {
+     "name": "b",
+     "label": "Azul",
+     "min": 0,
+     "max": 1,
+     "default": 0.2
+    }
+   ],
+   "glsl": "vec4 c = src(uv); return pre(vec3(dot(unpre(c), LUMA)) * vec3(P(0), P(1), P(2)), c.a);"
+  },
+  {
+   "id": "gamma",
+   "name": "Gamma",
+   "category": "Color",
+   "params": [
+    {
+     "name": "gamma",
+     "label": "Gamma",
+     "min": 0.1,
+     "max": 4,
+     "default": 1
+    }
+   ],
+   "glsl": "vec4 c = src(uv); return pre(pow(unpre(c), vec3(1.0 / P(0))), c.a);"
+  },
+  {
+   "id": "exposure",
+   "name": "Exposición",
+   "category": "Color",
+   "params": [
+    {
+     "name": "stops",
+     "label": "Pasos",
+     "min": -4,
+     "max": 4,
+     "default": 0
+    }
+   ],
+   "glsl": "vec4 c = src(uv); return pre(unpre(c) * pow(2.0, P(0)), c.a);"
+  },
+  {
+   "id": "lut",
+   "name": "LUT",
+   "category": "Color",
+   "params": [
+    {
+     "name": "file",
+     "label": "Archivo .cube",
+     "type": "string",
+     "default": ""
+    }
+   ],
+   "glsl": "vec4 c = src(uv); float n = float(textureSize(uTex1, 0).y); if (n < 2.0) return c; vec3 k = clamp(unpre(c), 0.0, 1.0) * (n - 1.0); float z = floor(min(k.b, n - 2.0)); float f = k.b - z; vec2 t = (k.rg + 0.5) / vec2(n * n, n); vec4 a = texture(uTex1, t + vec2(z / n, 0.0)); vec4 b = texture(uTex1, t + vec2((z + 1.0) / n, 0.0)); return pre(mix(a, b, f).rgb, c.a);"
+  },
+  {
+   "id": "auto-mask",
+   "name": "Auto Mask",
+   "category": "Color",
+   "params": [
+    {
+     "name": "softness",
+     "label": "Suavidad",
+     "min": 0.01,
+     "max": 1,
+     "default": 0.2
+    }
+   ],
+   "glsl": "vec4 c = src(uv); float a = clamp(dot(unpre(c), LUMA) / P(0), 0.0, 1.0); return c * a;"
+  },
+  {
+   "id": "pixelate",
+   "name": "Pixelar",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "size",
+     "label": "Tamaño",
+     "min": 1,
+     "max": 200,
+     "default": 1
+    }
+   ],
+   "glsl": "vec2 g = uSize / floor(P(0)); return src((floor(uv * g) + 0.5) / g);"
+  },
+  {
+   "id": "flip",
+   "name": "Flip",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "horizontal",
+     "label": "Horizontal",
+     "type": "bool",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "vertical",
+     "label": "Vertical",
+     "type": "bool",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   ],
+   "glsl": "vec2 q = uv; if (P(0) > 0.5) q.x = 1.0 - q.x; if (P(1) > 0.5) q.y = 1.0 - q.y; return src(q);"
+  },
+  {
+   "id": "mirror",
+   "name": "Espejo",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "horizontal",
+     "label": "Horizontal",
+     "type": "bool",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "vertical",
+     "label": "Vertical",
+     "type": "bool",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   ],
+   "glsl": "vec2 q = uv; if (P(0) > 0.5) q.x = 0.5 - abs(q.x - 0.5); if (P(1) > 0.5) q.y = 0.5 - abs(q.y - 0.5); return src(q);"
+  },
+  {
+   "id": "kaleidoscope",
+   "name": "Caleidoscopio",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "sides",
+     "label": "Lados",
+     "min": 2,
+     "max": 16,
+     "default": 6
+    },
+    {
+     "name": "angle",
+     "label": "Ángulo",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   ],
+   "glsl": "vec2 q = uv - 0.5; float s = 6.28318 / floor(P(0)); float a = abs(mod(atan(q.y, q.x) + P(1) * 6.28318, s) - s * 0.5); return src(0.5 + length(q) * vec2(cos(a), sin(a)));"
+  },
+  {
+   "id": "wave-warp",
+   "name": "Wave Warp",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 0.2,
+     "default": 0
+    },
+    {
+     "name": "frequency",
+     "label": "Frecuencia",
+     "min": 1,
+     "max": 40,
+     "default": 10
+    },
+    {
+     "name": "speed",
+     "label": "Velocidad",
+     "min": 0,
+     "max": 10,
+     "default": 1
+    }
+   ],
+   "glsl": "return src(uv + vec2(sin(uv.y * P(1) + uTime * P(2)), cos(uv.x * P(1) + uTime * P(2))) * P(0));"
+  },
+  {
+   "id": "ripple",
+   "name": "Ondas",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 0.2,
+     "default": 0
+    },
+    {
+     "name": "frequency",
+     "label": "Frecuencia",
+     "min": 1,
+     "max": 60,
+     "default": 20
+    },
+    {
+     "name": "speed",
+     "label": "Velocidad",
+     "min": 0,
+     "max": 20,
+     "default": 4
+    }
+   ],
+   "glsl": "vec2 q = uv - 0.5; float r = length(q); return src(uv + normalize(q + 1e-5) * sin(r * P(1) - uTime * P(2)) * P(0));"
+  },
+  {
+   "id": "twirl",
+   "name": "Remolino",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Giro",
+     "min": -10,
+     "max": 10,
+     "default": 0
+    },
+    {
+     "name": "radius",
+     "label": "Radio",
+     "min": 0.05,
+     "max": 1,
+     "default": 0.5
+    }
+   ],
+   "glsl": "vec2 q = uv - 0.5; float t = max(0.0, 1.0 - length(q) / P(1)); float a = t * t * P(0); return src(0.5 + mat2(cos(a), sin(a), -sin(a), cos(a)) * q);"
+  },
+  {
+   "id": "tile",
+   "name": "Mosaico",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "columns",
+     "label": "Columnas",
+     "min": 1,
+     "max": 16,
+     "default": 2
+    },
+    {
+     "name": "rows",
+     "label": "Filas",
+     "min": 1,
+     "max": 16,
+     "default": 2
+    }
+   ],
+   "glsl": "return src(fract(uv * vec2(floor(P(0)), floor(P(1)))));"
+  },
+  {
+   "id": "fisheye",
+   "name": "Ojo de pez",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": -1,
+     "max": 1,
+     "default": 0
+    }
+   ],
+   "glsl": "vec2 q = uv - 0.5; return src(0.5 + q * (1.0 + P(0) * dot(q, q) * 2.0));"
+  },
+  {
+   "id": "zoom-pulse",
+   "name": "Pulso al beat",
+   "category": "Tiempo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "rate",
+     "label": "Beats",
+     "min": 0.25,
+     "max": 8,
+     "default": 1
+    }
+   ],
+   "glsl": "float t = 1.0 - fract(uBeat / P(1)); return src(0.5 + (uv - 0.5) / (1.0 + P(0) * t * t * t));"
+  },
+  {
+   "id": "strobe",
+   "name": "Estrobo al beat",
+   "category": "Tiempo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "rate",
+     "label": "Beats",
+     "min": 0.125,
+     "max": 8,
+     "default": 1
+    }
+   ],
+   "glsl": "vec4 c = src(uv); return c * mix(1.0, step(0.5, fract(uBeat / P(1))) , P(0));"
+  },
+  {
+   "id": "shift-rgb",
+   "name": "Shift RGB",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 0.1,
+     "default": 0
+    }
+   ],
+   "glsl": "vec2 d = vec2(P(0), 0.0); vec4 c = src(uv); return vec4(src(uv + d).r, c.g, src(uv - d).b, c.a);"
+  },
+  {
+   "id": "blur",
+   "name": "Desenfoque",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "radius",
+     "label": "Radio",
+     "min": 0,
+     "max": 32,
+     "default": 0
+    }
+   ],
+   "glsl": "vec4 s = vec4(0.0); float w = 0.0; for (int x = -4; x <= 4; ++x) for (int y = -4; y <= 4; ++y) { float g = exp(-float(x * x + y * y) / 8.0); s += src(uv + vec2(x, y) * P(0) / 4.0 / uSize) * g; w += g; } return s / w;"
+  },
+  {
+   "id": "sharpen",
+   "name": "Enfocar",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 5,
+     "default": 0
+    }
+   ],
+   "glsl": "vec2 p = 1.0 / uSize; vec4 c = src(uv); vec4 b = (src(uv + vec2(p.x, 0.0)) + src(uv - vec2(p.x, 0.0)) + src(uv + vec2(0.0, p.y)) + src(uv - vec2(0.0, p.y))) * 0.25; return clamp(c + (c - b) * P(0), 0.0, 1.0);"
+  },
+  {
+   "id": "edge",
+   "name": "Bordes",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "strength",
+     "label": "Intensidad",
+     "min": 0,
+     "max": 10,
+     "default": 2
+    }
+   ],
+   "glsl": "vec2 p = 1.0 / uSize; float gx = dot(src(uv + vec2(p.x, 0.0)).rgb - src(uv - vec2(p.x, 0.0)).rgb, LUMA); float gy = dot(src(uv + vec2(0.0, p.y)).rgb - src(uv - vec2(0.0, p.y)).rgb, LUMA); vec4 c = src(uv); return vec4(vec3(clamp(length(vec2(gx, gy)) * P(0), 0.0, 1.0)) * c.a, c.a);"
+  },
+  {
+   "id": "emboss",
+   "name": "Relieve",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "strength",
+     "label": "Intensidad",
+     "min": 0,
+     "max": 10,
+     "default": 2
+    }
+   ],
+   "glsl": "vec2 p = 2.0 / uSize; vec4 c = src(uv); float d = dot(src(uv + p).rgb - src(uv - p).rgb, LUMA); return vec4(vec3(clamp(0.5 + d * P(0), 0.0, 1.0)) * c.a, c.a);"
+  },
+  {
+   "id": "vignette",
+   "name": "Viñeta",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 2,
+     "default": 0
+    },
+    {
+     "name": "size",
+     "label": "Tamaño",
+     "min": 0.1,
+     "max": 1,
+     "default": 0.5
+    }
+   ],
+   "glsl": "float d = length((uv - 0.5) * vec2(uSize.x / uSize.y, 1.0)); return src(uv) * (1.0 - clamp(smoothstep(P(1), P(1) + 0.5, d) * P(0), 0.0, 1.0));"
+  },
+  {
+   "id": "scanlines",
+   "name": "Líneas de barrido",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "count",
+     "label": "Líneas",
+     "min": 10,
+     "max": 1000,
+     "default": 300
+    }
+   ],
+   "glsl": "return src(uv) * (1.0 - P(0) * (0.5 + 0.5 * sin(uv.y * P(1) * 6.28318)));"
+  },
+  {
+   "id": "noise",
+   "name": "Ruido",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   ],
+   "glsl": "vec4 c = src(uv); return clamp(c + (hash(uv + fract(uTime)) - 0.5) * P(0) * c.a, 0.0, 1.0);"
+  },
+  {
+   "id": "dots",
+   "name": "Trama de puntos",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "size",
+     "label": "Tamaño",
+     "min": 2,
+     "max": 60,
+     "default": 8
+    }
+   ],
+   "glsl": "vec2 g = uSize / P(0); vec2 cell = (floor(uv * g) + 0.5) / g; vec4 c = src(cell); float r = length(fract(uv * g) - 0.5) * 2.0; return c * step(r, sqrt(dot(unpre(c), LUMA)));"
+  },
+  {
+   "id": "chroma-key",
+   "name": "Clave de color",
+   "category": "Color",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "hue",
+     "label": "Tono",
+     "min": 0,
+     "max": 1,
+     "default": 0.33
+    },
+    {
+     "name": "soft",
+     "label": "Suavidad",
+     "min": 0,
+     "max": 0.5,
+     "default": 0.1
+    }
+   ],
+   "glsl": "vec4 c = src(uv); vec3 k = clamp(abs(mod(P(1) * 6.0 + vec3(0.0, 4.0, 2.0), 6.0) - 3.0) - 1.0, 0.0, 1.0); float m = smoothstep(P(2) * 0.5, P(2) * 1.5 + 0.01, distance(normalize(c.rgb + 0.001), normalize(k))); return vec4(c.rgb, c.a * mix(1.0, m, P(0)));"
+  },
+  {
+   "id": "luma-key",
+   "name": "Clave de luminancia",
+   "category": "Color",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "level",
+     "label": "Nivel",
+     "min": 0,
+     "max": 1,
+     "default": 0.2
+    },
+    {
+     "name": "soft",
+     "label": "Suavidad",
+     "min": 0,
+     "max": 0.5,
+     "default": 0.1
+    }
+   ],
+   "glsl": "vec4 c = src(uv); float l = dot(c.rgb, vec3(0.299, 0.587, 0.114)); return vec4(c.rgb, c.a * mix(1.0, smoothstep(P(1), P(1) + P(2) + 0.001, l), P(0)));"
+  },
+  {
+   "id": "duotone",
+   "name": "Dos tonos",
+   "category": "Color",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "dark",
+     "label": "Oscuro",
+     "min": 0,
+     "max": 1,
+     "default": 0.6
+    },
+    {
+     "name": "light",
+     "label": "Claro",
+     "min": 0,
+     "max": 1,
+     "default": 0.1
+    }
+   ],
+   "glsl": "vec4 c = src(uv); float l = dot(c.rgb, vec3(0.299, 0.587, 0.114)); vec3 a = 0.5 + 0.5 * cos(6.2832 * (P(1) + vec3(0.0, 0.33, 0.67))); vec3 b = 0.5 + 0.5 * cos(6.2832 * (P(2) + vec3(0.0, 0.33, 0.67))); return vec4(mix(c.rgb, mix(a * 0.2, b, l), P(0)), c.a);"
+  },
+  {
+   "id": "hue-cycle",
+   "name": "Ciclo de color",
+   "category": "Color",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "speed",
+     "label": "Velocidad",
+     "min": 0,
+     "max": 4,
+     "default": 0.25
+    },
+    {
+     "name": "offset",
+     "label": "Desfase",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   ],
+   "glsl": "vec4 c = src(uv); float a = 6.2832 * fract(uBeat * P(1) * 0.25 + P(2)); vec3 k = vec3(0.57735); vec3 r = c.rgb * cos(a) + cross(k, c.rgb) * sin(a) + k * dot(k, c.rgb) * (1.0 - cos(a)); return vec4(mix(c.rgb, r, P(0)), c.a);"
+  },
+  {
+   "id": "levels",
+   "name": "Niveles",
+   "category": "Color",
+   "params": [
+    {
+     "name": "black",
+     "label": "Negro",
+     "min": 0,
+     "max": 0.9,
+     "default": 0
+    },
+    {
+     "name": "white",
+     "label": "Blanco",
+     "min": 0.1,
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "mid",
+     "label": "Medios",
+     "min": 0.2,
+     "max": 3,
+     "default": 1
+    }
+   ],
+   "glsl": "vec4 c = src(uv); vec3 v = clamp((c.rgb - P(0)) / max(P(1) - P(0), 0.001), 0.0, 1.0); return vec4(pow(v, vec3(1.0 / P(2))), c.a);"
+  },
+  {
+   "id": "sepia",
+   "name": "Sepia",
+   "category": "Color",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   ],
+   "glsl": "vec4 c = src(uv); vec3 s = vec3(dot(c.rgb, vec3(0.393, 0.769, 0.189)), dot(c.rgb, vec3(0.349, 0.686, 0.168)), dot(c.rgb, vec3(0.272, 0.534, 0.131))); return vec4(mix(c.rgb, s, P(0)), c.a);"
+  },
+  {
+   "id": "glow",
+   "name": "Resplandor",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "radius",
+     "label": "Radio",
+     "min": 0,
+     "max": 0.05,
+     "default": 0.01
+    },
+    {
+     "name": "level",
+     "label": "Umbral",
+     "min": 0,
+     "max": 1,
+     "default": 0.5
+    }
+   ],
+   "glsl": "vec4 c = src(uv); vec3 g = vec3(0.0); for (int i = 0; i < 12; i++) { float a = float(i) * 0.5236; vec2 o = vec2(cos(a), sin(a)) * P(1); vec3 t = src(uv + o).rgb + src(uv + o * 0.5).rgb; g += max(t - P(2) * 2.0, 0.0); } return vec4(c.rgb + g / 12.0 * P(0) * 2.0, c.a);"
+  },
+  {
+   "id": "watercolor",
+   "name": "Acuarela",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "scale",
+     "label": "Escala",
+     "min": 1,
+     "max": 40,
+     "default": 12
+    },
+    {
+     "name": "levels",
+     "label": "Pasos",
+     "min": 2,
+     "max": 16,
+     "default": 6
+    }
+   ],
+   "glsl": "vec2 q = uv * P(1); vec2 n = vec2(sin(q.y * 1.7 + sin(q.x * 0.9)), cos(q.x * 1.3 + sin(q.y * 1.1))) * 0.004; vec4 c = src(uv + n * P(0)); vec4 d = src(uv - n * P(0)); vec3 v = floor(mix(c.rgb, d.rgb, 0.5) * P(2) + 0.5) / P(2); return vec4(mix(src(uv).rgb, v, P(0)), c.a);"
+  },
+  {
+   "id": "halftone",
+   "name": "Semitono",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "size",
+     "label": "Tamaño",
+     "min": 2,
+     "max": 40,
+     "default": 10
+    },
+    {
+     "name": "angle",
+     "label": "Ángulo",
+     "min": 0,
+     "max": 3.1416,
+     "default": 0.6
+    }
+   ],
+   "glsl": "float s = sin(P(2)), k = cos(P(2)); vec2 p = mat2(k, -s, s, k) * (uv * uSize) / P(1); vec4 c = src(uv); float l = dot(c.rgb, vec3(0.299, 0.587, 0.114)); float r = length(fract(p) - 0.5); float m = smoothstep(0.0, 0.08, sqrt(l) * 0.7 - r); return vec4(mix(c.rgb, c.rgb * m, P(0)), c.a);"
+  },
+  {
+   "id": "crosshatch",
+   "name": "Trama",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "size",
+     "label": "Tamaño",
+     "min": 2,
+     "max": 30,
+     "default": 8
+    }
+   ],
+   "glsl": "vec4 c = src(uv); float l = dot(c.rgb, vec3(0.299, 0.587, 0.114)); vec2 p = uv * uSize; float t = 1.0; if (l < 0.75 && mod(p.x + p.y, P(1)) < 1.5) t = 0.0; if (l < 0.5 && mod(p.x - p.y, P(1)) < 1.5) t = 0.0; if (l < 0.25 && mod(p.x + p.y - P(1) * 0.5, P(1)) < 1.5) t = 0.0; return vec4(mix(c.rgb, c.rgb * t, P(0)), c.a);"
+  },
+  {
+   "id": "glitch",
+   "name": "Fallo digital",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "bands",
+     "label": "Bandas",
+     "min": 2,
+     "max": 60,
+     "default": 18
+    },
+    {
+     "name": "speed",
+     "label": "Velocidad",
+     "min": 0,
+     "max": 8,
+     "default": 2
+    }
+   ],
+   "glsl": "float b = floor(uv.y * P(1)); float t = floor(uBeat * P(2) * 4.0); float h = fract(sin(b * 12.9898 + t * 78.233) * 43758.5453); float o = (h > 0.7 ? (h - 0.85) * 0.5 : 0.0) * P(0); vec4 c = src(uv + vec2(o, 0.0)); c.r = src(uv + vec2(o * 1.5, 0.0)).r; c.b = src(uv - vec2(o * 0.5, 0.0)).b; return c;"
+  },
+  {
+   "id": "crt",
+   "name": "Monitor antiguo",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "lines",
+     "label": "Líneas",
+     "min": 100,
+     "max": 1200,
+     "default": 480
+    }
+   ],
+   "glsl": "vec2 q = uv - 0.5; vec2 w = q * (1.0 + dot(q, q) * 0.2 * P(0)) + 0.5; vec4 c = src(w); float s = 0.5 + 0.5 * sin(w.y * P(1) * 3.1416); return vec4(c.rgb * mix(1.0, 0.6 + 0.6 * s, P(0)), c.a);"
+  },
+  {
+   "id": "film-grain",
+   "name": "Grano",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   ],
+   "glsl": "vec4 c = src(uv); float n = fract(sin(dot(uv * uSize + uTime * 60.0, vec2(12.9898, 78.233))) * 43758.5453) - 0.5; return vec4(c.rgb + n * P(0) * 0.5, c.a);"
+  },
+  {
+   "id": "radial-blur",
+   "name": "Desenfoque radial",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "x",
+     "label": "Centro X",
+     "min": 0,
+     "max": 1,
+     "default": 0.5
+    },
+    {
+     "name": "y",
+     "label": "Centro Y",
+     "min": 0,
+     "max": 1,
+     "default": 0.5
+    }
+   ],
+   "glsl": "vec2 m = vec2(P(1), P(2)); vec4 s = vec4(0.0); for (int i = 0; i < 16; i++) s += src(mix(uv, m, float(i) / 16.0 * P(0) * 0.5)); return s / 16.0;"
+  },
+  {
+   "id": "directional-blur",
+   "name": "Desenfoque direccional",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 0.1,
+     "default": 0
+    },
+    {
+     "name": "angle",
+     "label": "Ángulo",
+     "min": 0,
+     "max": 6.2832,
+     "default": 0
+    }
+   ],
+   "glsl": "vec2 d = vec2(cos(P(1)), sin(P(1))) * P(0); vec4 s = vec4(0.0); for (int i = 0; i < 16; i++) s += src(uv + d * (float(i) / 15.0 - 0.5)); return s / 16.0;"
+  },
+  {
+   "id": "stripes",
+   "name": "Barrido de franjas",
+   "category": "Estilo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "count",
+     "label": "Número",
+     "min": 1,
+     "max": 40,
+     "default": 8
+    },
+    {
+     "name": "speed",
+     "label": "Velocidad",
+     "min": -4,
+     "max": 4,
+     "default": 1
+    },
+    {
+     "name": "width",
+     "label": "Ancho",
+     "min": 0.05,
+     "max": 0.95,
+     "default": 0.5
+    },
+    {
+     "name": "angle",
+     "label": "Ángulo",
+     "min": 0,
+     "max": 3.1416,
+     "default": 0
+    }
+   ],
+   "glsl": "float f = fract(dot(uv - 0.5, vec2(cos(P(4)), sin(P(4)))) * P(1) + uBeat * P(2) * 0.25); vec4 c = src(uv); return vec4(c.rgb * mix(1.0, step(f, P(3)), P(0)), c.a);"
+  },
+  {
+   "id": "tunnel",
+   "name": "Túnel",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "speed",
+     "label": "Velocidad",
+     "min": -4,
+     "max": 4,
+     "default": 0.5
+    },
+    {
+     "name": "twist",
+     "label": "Giro",
+     "min": -2,
+     "max": 2,
+     "default": 0.3
+    }
+   ],
+   "glsl": "vec2 p = (uv - 0.5) * vec2(uSize.x / uSize.y, 1.0); float r = length(p) + 0.001; vec2 t = fract(vec2(atan(p.y, p.x) / 6.2832 + P(2) / r * 0.1, 0.25 / r + uBeat * P(1) * 0.25)); return mix(src(uv), src(t), P(0));"
+  },
+  {
+   "id": "polar",
+   "name": "Coordenadas polares",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    }
+   ],
+   "glsl": "vec2 p = uv - 0.5; vec2 t = vec2(atan(p.y, p.x) / 6.2832 + 0.5, length(p) * 1.414); return src(mix(uv, t, P(0)));"
+  },
+  {
+   "id": "sphere",
+   "name": "Esfera",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "radius",
+     "label": "Radio",
+     "min": 0.1,
+     "max": 0.7,
+     "default": 0.45
+    }
+   ],
+   "glsl": "vec2 p = (uv - 0.5) * vec2(uSize.x / uSize.y, 1.0); float r = length(p) / P(1); if (r >= 1.0) return mix(src(uv), vec4(0.0), P(0)); float z = sqrt(1.0 - r * r); vec2 t = p / (z + 1.0) / P(1) * vec2(uSize.y / uSize.x, 1.0) + 0.5; return mix(src(uv), src(t), P(0));"
+  },
+  {
+   "id": "slide",
+   "name": "Desplazamiento",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "x",
+     "label": "X",
+     "min": -1,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "y",
+     "label": "Y",
+     "min": -1,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "speed",
+     "label": "Velocidad",
+     "min": -4,
+     "max": 4,
+     "default": 0
+    }
+   ],
+   "glsl": "return src(fract(uv + vec2(P(0), P(1)) + vec2(uBeat * P(2) * 0.25, 0.0)));"
+  },
+  {
+   "id": "slit-rows",
+   "name": "Corte por filas",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "rows",
+     "label": "Filas",
+     "min": 2,
+     "max": 80,
+     "default": 20
+    },
+    {
+     "name": "speed",
+     "label": "Velocidad",
+     "min": 0,
+     "max": 8,
+     "default": 1
+    }
+   ],
+   "glsl": "float r = floor(uv.y * P(1)); float o = sin(r * 1.7 + uBeat * P(2)) * 0.1 * P(0); return src(fract(uv + vec2(o, 0.0)));"
+  },
+  {
+   "id": "hex-pixel",
+   "name": "Píxel hexagonal",
+   "category": "Geometría",
+   "params": [
+    {
+     "name": "size",
+     "label": "Tamaño",
+     "min": 0,
+     "max": 60,
+     "default": 0
+    }
+   ],
+   "glsl": "if (P(0) < 1.0) return src(uv); vec2 p = uv * uSize / P(0); vec2 s = vec2(1.0, 1.732); vec2 a = mod(p, s) - s * 0.5; vec2 b = mod(p - s * 0.5, s) - s * 0.5; vec2 g = dot(a, a) < dot(b, b) ? a : b; return src((p - g) * P(0) / uSize);"
+  },
+  {
+   "id": "beat-flash",
+   "name": "Flash al ritmo",
+   "category": "Tiempo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "rate",
+     "label": "Golpes por compás",
+     "min": 1,
+     "max": 8,
+     "default": 4
+    }
+   ],
+   "glsl": "vec4 c = src(uv); float f = pow(1.0 - fract(uBeat * P(1) / 4.0), 4.0); return vec4(c.rgb + f * P(0), c.a);"
+  },
+  {
+   "id": "beat-zoom",
+   "name": "Zoom al ritmo",
+   "category": "Tiempo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "rate",
+     "label": "Golpes por compás",
+     "min": 1,
+     "max": 8,
+     "default": 4
+    }
+   ],
+   "glsl": "float f = pow(1.0 - fract(uBeat * P(1) / 4.0), 3.0); return src((uv - 0.5) / (1.0 + f * P(0) * 0.5) + 0.5);"
+  },
+  {
+   "id": "beat-gate",
+   "name": "Corte al ritmo",
+   "category": "Tiempo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "rate",
+     "label": "Golpes por compás",
+     "min": 1,
+     "max": 16,
+     "default": 8
+    },
+    {
+     "name": "width",
+     "label": "Ancho del corte",
+     "min": 0,
+     "max": 1,
+     "default": 0.5
+    },
+    {
+     "name": "phase",
+     "label": "Fase",
+     "min": 0,
+     "max": 0.5,
+     "default": 0
+    }
+   ],
+   "glsl": "vec4 c = src(uv); float g = clamp((fract(uBeat * P(1) / 4.0 + P(3)) - P(2)) / max(1.0 - P(2), 0.001), 0.0, 1.0); return vec4(c.rgb * mix(1.0, g, P(0)), c.a);"
+  },
+  {
+   "id": "trails",
+   "name": "Estelas",
+   "category": "Tiempo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Persistencia",
+     "min": 0,
+     "max": 0.99,
+     "default": 0
+    }
+   ],
+   "glsl": "vec4 c = src(uv); vec4 m = mem(uv) * P(0); return max(c, m);",
+   "memory": {
+    "frames": 1,
+    "output": true
+   }
+  },
+  {
+   "id": "echo-zoom",
+   "name": "Eco con zoom",
+   "category": "Tiempo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Persistencia",
+     "min": 0,
+     "max": 0.98,
+     "default": 0
+    },
+    {
+     "name": "zoom",
+     "label": "Zoom",
+     "min": 0.9,
+     "max": 1.1,
+     "default": 1.01
+    },
+    {
+     "name": "rotation",
+     "label": "Giro",
+     "min": -5,
+     "max": 5,
+     "default": 0
+    }
+   ],
+   "glsl": "float a = radians(P(2)); vec2 q = mat2(cos(a), sin(a), -sin(a), cos(a)) * ((uv - 0.5) * uSize) / P(1) / uSize + 0.5; vec4 c = src(uv); return max(c, mem(q) * P(0));",
+   "memory": {
+    "frames": 1,
+    "output": true
+   }
+  },
+  {
+   "id": "smear",
+   "name": "Arrastre de píxeles",
+   "category": "Tiempo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 0.98,
+     "default": 0
+    },
+    {
+     "name": "distance",
+     "label": "Distancia",
+     "min": 0,
+     "max": 0.02,
+     "default": 0.005
+    }
+   ],
+   "glsl": "vec4 c = src(uv); float l = dot(c.rgb, LUMA) * 6.2832; return mix(c, mem(uv + vec2(cos(l), sin(l)) * P(1)), P(0));",
+   "memory": {
+    "frames": 1,
+    "output": true
+   }
+  },
+  {
+   "id": "beat-freeze",
+   "name": "Congelado al ritmo",
+   "category": "Tiempo",
+   "params": [
+    {
+     "name": "amount",
+     "label": "Cantidad",
+     "min": 0,
+     "max": 1,
+     "default": 0
+    },
+    {
+     "name": "rate",
+     "label": "Golpes por compás",
+     "min": 1,
+     "max": 16,
+     "default": 4
+    },
+    {
+     "name": "hold",
+     "label": "Tiempo congelado",
+     "min": 0,
+     "max": 1,
+     "default": 0.5
+    }
+   ],
+   "glsl": "float g = step(fract(uBeat * P(1) / 4.0), P(2)); return mix(src(uv), mem(uv), g * P(0));",
+   "memory": {
+    "frames": 1,
+    "output": true
+   }
+  },
+  {
+   "id": "frame-delay",
+   "name": "Retardo de imagen",
+   "category": "Tiempo",
+   "params": [
+    {
+     "name": "frames",
+     "label": "Fotogramas",
+     "min": 0,
+     "max": 59,
+     "default": 0
+    }
+   ],
+   "glsl": "return mem(uv);",
+   "memory": {
+    "frames": 60,
+    "ageA": 0
+   }
+  },
+  {
+   "id": "rgb-delay",
+   "name": "Retardo RGB",
+   "category": "Tiempo",
+   "params": [
+    {
+     "name": "green",
+     "label": "Retardo verde",
+     "min": 0,
+     "max": 29,
+     "default": 0
+    },
+    {
+     "name": "blue",
+     "label": "Retardo azul",
+     "min": 0,
+     "max": 29,
+     "default": 0
+    }
+   ],
+   "glsl": "vec4 c = src(uv); return vec4(c.r, mem(uv).g, mem2(uv).b, c.a);",
+   "memory": {
+    "frames": 30,
+    "ageA": 0,
+    "ageB": 1
+   }
+  }
+ ],
+ "sources": [
+  {
+   "id": "solid",
+   "name": "Color",
+   "category": "Fuente",
+   "params": [
+    {
+     "name": "r",
+     "label": "Rojo",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "g",
+     "label": "Verde",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "b",
+     "label": "Azul",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    }
+   ],
+   "glsl": "return vec4(P(0), P(1), P(2), 1.0);"
+  },
+  {
+   "id": "gradient",
+   "name": "Degradado",
+   "category": "Fuente",
+   "params": [
+    {
+     "name": "angle",
+     "label": "Ángulo",
+     "min": 0,
+     "max": 360,
+     "default": 0
+    },
+    {
+     "name": "speed",
+     "label": "Velocidad",
+     "min": -2,
+     "max": 2,
+     "default": 0
+    }
+   ],
+   "glsl": "float a = radians(P(0)); float t = dot(uv - 0.5, vec2(cos(a), sin(a))) + 0.5 + uTime * P(1); return vec4(vec3(1.0 - abs(fract(t) * 2.0 - 1.0)), 1.0);"
+  },
+  {
+   "id": "checker",
+   "name": "Damero",
+   "category": "Fuente",
+   "params": [
+    {
+     "name": "cells",
+     "label": "Celdas",
+     "min": 2,
+     "max": 64,
+     "default": 16
+    },
+    {
+     "name": "speed",
+     "label": "Velocidad",
+     "min": -2,
+     "max": 2,
+     "default": 0
+    }
+   ],
+   "glsl": "vec2 q = (uv + vec2(uTime * P(1) * 0.1, 0.0)) * vec2(uSize.x / uSize.y, 1.0) * P(0); return vec4(vec3(mod(floor(q.x) + floor(q.y), 2.0)), 1.0);"
+  },
+  {
+   "id": "plasma",
+   "name": "Plasma",
+   "category": "Fuente",
+   "params": [
+    {
+     "name": "scale",
+     "label": "Escala",
+     "min": 1,
+     "max": 30,
+     "default": 8
+    },
+    {
+     "name": "speed",
+     "label": "Velocidad",
+     "min": 0,
+     "max": 5,
+     "default": 1
+    }
+   ],
+   "glsl": "float t = uTime * P(1); vec2 q = uv * P(0); float v = sin(q.x + t) + sin(q.y + t * 1.3) + sin(q.x + q.y + t * 0.7) + sin(length(q) + t); return vec4(0.5 + 0.5 * sin(v + vec3(0.0, 2.1, 4.2)), 1.0);"
+  },
+  {
+   "id": "lines",
+   "name": "Líneas",
+   "category": "Fuente",
+   "params": [
+    {
+     "name": "count",
+     "label": "Líneas",
+     "min": 1,
+     "max": 64,
+     "default": 12
+    },
+    {
+     "name": "width",
+     "label": "Grosor",
+     "min": 0.01,
+     "max": 1,
+     "default": 0.5
+    },
+    {
+     "name": "speed",
+     "label": "Velocidad",
+     "min": -4,
+     "max": 4,
+     "default": 0
+    }
+   ],
+   "glsl": "return vec4(vec3(step(fract(uv.x * P(0) + uTime * P(2)), P(1))), 1.0);"
+  },
+  {
+   "id": "circles",
+   "name": "Círculos",
+   "category": "Fuente",
+   "params": [
+    {
+     "name": "count",
+     "label": "Anillos",
+     "min": 1,
+     "max": 40,
+     "default": 8
+    },
+    {
+     "name": "speed",
+     "label": "Velocidad",
+     "min": -4,
+     "max": 4,
+     "default": 0
+    }
+   ],
+   "glsl": "float r = length((uv - 0.5) * vec2(uSize.x / uSize.y, 1.0)); return vec4(vec3(step(0.5, fract(r * P(0) - uTime * P(1)))), 1.0);"
+  },
+  {
+   "id": "noise-field",
+   "name": "Campo de ruido",
+   "category": "Fuente",
+   "params": [
+    {
+     "name": "scale",
+     "label": "Escala",
+     "min": 2,
+     "max": 200,
+     "default": 40
+    }
+   ],
+   "glsl": "return vec4(vec3(hash(floor(uv * P(0)) + floor(uTime * 15.0))), 1.0);"
+  },
+  {
+   "id": "text",
+   "name": "Texto",
+   "category": "Fuente",
+   "params": [
+    {
+     "name": "text",
+     "label": "Texto",
+     "type": "string",
+     "default": "VJ STUDIO"
+    },
+    {
+     "name": "size",
+     "label": "Tamaño",
+     "min": 8,
+     "max": 400,
+     "default": 120
+    },
+    {
+     "name": "r",
+     "label": "Rojo",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "g",
+     "label": "Verde",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    },
+    {
+     "name": "b",
+     "label": "Azul",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    }
+   ],
+   "glsl": "float a = texture(uTex1, vec2(uv.x, 1.0 - uv.y)).a; return vec4(vec3(P(1), P(2), P(3)) * a, a);"
+  }
+ ],
+ "audio": [
+  {
+   "id": "a-lowpass",
+   "name": "Low-Pass",
+   "category": "Audio",
+   "params": [
+    {
+     "name": "cutoff",
+     "label": "Corte",
+     "min": 20,
+     "max": 20000,
+     "default": 20000
+    },
+    {
+     "name": "resonance",
+     "label": "Resonancia",
+     "min": 0.3,
+     "max": 10,
+     "default": 0.707
+    },
+    {
+     "name": "wet",
+     "label": "Dry/Wet",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    }
+   ],
+   "glsl": ""
+  },
+  {
+   "id": "a-highpass",
+   "name": "High-Pass",
+   "category": "Audio",
+   "params": [
+    {
+     "name": "cutoff",
+     "label": "Corte",
+     "min": 20,
+     "max": 20000,
+     "default": 20
+    },
+    {
+     "name": "resonance",
+     "label": "Resonancia",
+     "min": 0.3,
+     "max": 10,
+     "default": 0.707
+    },
+    {
+     "name": "wet",
+     "label": "Dry/Wet",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    }
+   ],
+   "glsl": ""
+  },
+  {
+   "id": "a-delay",
+   "name": "Delay",
+   "category": "Audio",
+   "params": [
+    {
+     "name": "time",
+     "label": "Tiempo",
+     "min": 0.01,
+     "max": 2,
+     "default": 0.25
+    },
+    {
+     "name": "feedback",
+     "label": "Realimentación",
+     "min": 0,
+     "max": 0.95,
+     "default": 0.4
+    },
+    {
+     "name": "wet",
+     "label": "Dry/Wet",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    }
+   ],
+   "glsl": ""
+  },
+  {
+   "id": "a-flanger",
+   "name": "Flanger",
+   "category": "Audio",
+   "params": [
+    {
+     "name": "rate",
+     "label": "Velocidad",
+     "min": 0.05,
+     "max": 5,
+     "default": 0.3
+    },
+    {
+     "name": "depth",
+     "label": "Profundidad",
+     "min": 0,
+     "max": 1,
+     "default": 0.7
+    },
+    {
+     "name": "feedback",
+     "label": "Realimentación",
+     "min": 0,
+     "max": 0.9,
+     "default": 0.4
+    },
+    {
+     "name": "wet",
+     "label": "Dry/Wet",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    }
+   ],
+   "glsl": ""
+  },
+  {
+   "id": "a-bitcrusher",
+   "name": "Bitcrusher",
+   "category": "Audio",
+   "params": [
+    {
+     "name": "bits",
+     "label": "Bits",
+     "min": 1,
+     "max": 16,
+     "default": 8
+    },
+    {
+     "name": "downsample",
+     "label": "Reducción",
+     "min": 1,
+     "max": 32,
+     "default": 4
+    },
+    {
+     "name": "wet",
+     "label": "Dry/Wet",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    }
+   ],
+   "glsl": ""
+  },
+  {
+   "id": "a-distortion",
+   "name": "Distorsión",
+   "category": "Audio",
+   "params": [
+    {
+     "name": "drive",
+     "label": "Saturación",
+     "min": 1,
+     "max": 40,
+     "default": 6
+    },
+    {
+     "name": "wet",
+     "label": "Dry/Wet",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    }
+   ],
+   "glsl": ""
+  },
+  {
+   "id": "a-reverb",
+   "name": "Reverb",
+   "category": "Audio",
+   "params": [
+    {
+     "name": "size",
+     "label": "Tamaño",
+     "min": 0,
+     "max": 1,
+     "default": 0.6
+    },
+    {
+     "name": "damping",
+     "label": "Amortiguación",
+     "min": 0,
+     "max": 1,
+     "default": 0.4
+    },
+    {
+     "name": "wet",
+     "label": "Dry/Wet",
+     "min": 0,
+     "max": 1,
+     "default": 1
+    }
+   ],
+   "glsl": ""
+  }
+ ]
+}

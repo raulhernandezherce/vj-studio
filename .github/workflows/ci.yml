@@ -1,0 +1,30 @@
+name: ci
+on: [push, pull_request]
+jobs:
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: tools/regress.sh
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+      - run: cmake --build build --config Release --parallel
+      # Sin pantalla física: lo que dependa de OpenGL se omite solo.
+      - run: ctest --test-dir build -C Release --output-on-failure --timeout 180
+      - run: npm ci
+        working-directory: ui
+      - run: npm test
+        working-directory: ui
+      - run: npm run build -w vjstudio
+        working-directory: ui
+      - run: node packaging/package.mjs
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VJ-Studio-Windows
+          path: dist/*.exe

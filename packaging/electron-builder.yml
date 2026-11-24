@@ -1,0 +1,32 @@
+appId: com.vjstudio.app
+productName: VJ Studio
+directories:
+  output: out
+files:
+  - dist/**
+  - dist-electron/**
+  - package.json
+extraResources:
+  - from: engine-bin
+    to: engine
+mac:
+  category: public.app-category.video
+  target:
+    - target: dmg
+      arch: [arm64]
+  identity: "-"
+  hardenedRuntime: false
+  extendInfo:
+    NSCameraUsageDescription: VJ Studio usa la cámara como fuente de vídeo en directo.
+    NSMicrophoneUsageDescription: VJ Studio usa la entrada de audio para analizar música en directo.
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: always
+  createStartMenuShortcut: true
+dmg:
+  writeUpdateInfo: false

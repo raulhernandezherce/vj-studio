@@ -1,0 +1,7 @@
+if(WIN32)
+  add_executable(vjengine main.cpp windows.manifest)
+else()
+  add_executable(vjengine main.cpp)
+  target_link_libraries(vjengine PRIVATE vj_ffgl)
+endif()
+target_link_libraries(vjengine PRIVATE vj_dmx vj_patch vj_core vj_gfx vj_media vj_compositor vj_control vj_animation vj_project vj_shortcuts vj_output)

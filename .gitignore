@@ -1,0 +1,8 @@
+.toolchain/
+build/
+dist/
+node_modules/
+*.tsbuildinfo
+.DS_Store
+tests/.tmp/
+entrega/

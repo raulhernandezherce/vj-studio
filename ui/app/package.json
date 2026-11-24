@@ -1,0 +1,26 @@
+{
+  "name": "vjstudio",
+  "productName": "VJ Studio",
+  "version": "0.10.1",
+  "private": true,
+  "description": "Software VJ",
+  "author": "VJ Studio",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "build:renderer": "vite build",
+    "build:electron": "tsc -p electron/tsconfig.json",
+    "build": "npm run typecheck && npm run build:renderer && npm run build:electron",
+    "typecheck": "tsc -p tsconfig.json",
+    "start": "npm run build && electron .",
+    "smoke": "npm run build && electron . --no-sandbox",
+    "dist": "npm run build && node ../../packaging/package.mjs"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "@vj/advanced-output": "*",
+    "@vj/node-editor": "*",
+    "@vj/api-client": "*",
+    "@vj/panel-registry": "*",
+    "@vj/panels-core": "*"
+  }
+}

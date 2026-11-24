@@ -1,0 +1,38 @@
+import { panels } from '@vj/panel-registry';
+import { AnimationPanel } from './AnimationPanel';
+import { AudioPanel } from './AudioPanel';
+import { CompositionBar } from './CompositionBar';
+import { ControlPanel } from './ControlPanel';
+import { DmxPanel } from './DmxPanel';
+import { CatalogPanel, CompositionsPanel } from './BrowserPanels';
+import { ClipInspector, CompositionInspector } from './Inspector';
+import { DeckBar } from './DeckBar';
+import { FilesPanel } from './FilesPanel';
+import { MatrixPanel } from './MatrixPanel';
+import { MediaPanel } from './MediaPanel';
+import { MonitorsPanel } from './MonitorsPanel';
+import { ClipTimePanel, NotesPanel, PreferencesPanel } from './SmallPanels';
+
+panels.register({ id: 'composition-bar', title: '', milestone: 'M1', slot: 'top', order: 10, component: CompositionBar, fixed: true });
+panels.register({ id: 'monitors', title: '', milestone: 'M2', slot: 'lower', order: 10, component: MonitorsPanel, fixed: true });
+panels.register({ id: 'matrix', title: '', milestone: 'M1', slot: 'main', order: 10, component: MatrixPanel, fixed: true });
+panels.register({ id: 'decks', title: '', milestone: 'M2', slot: 'main', order: 15, component: DeckBar, fixed: true });
+panels.register({ id: 'composition-inspector', title: '', milestone: 'M1', slot: 'lower', order: 20, component: CompositionInspector, fixed: true });
+panels.register({ id: 'clip-inspector', title: '', milestone: 'M1', slot: 'lower', order: 30, component: ClipInspector, fixed: true });
+panels.register({ id: 'files', title: 'Archivos', milestone: 'M2', slot: 'side', order: 5, component: FilesPanel });
+panels.register({ id: 'compositions', title: 'Composiciones', milestone: 'M2', slot: 'side', order: 6, component: CompositionsPanel });
+panels.register({ id: 'effects-browser', title: 'Efectos', milestone: 'M3', slot: 'side', order: 7, component: () => <CatalogPanel kind="effect" /> });
+panels.register({ id: 'sources-browser', title: 'Fuentes', milestone: 'M3', slot: 'side', order: 8, component: () => <CatalogPanel kind="source" /> });
+panels.register({ id: 'animation', title: 'Animación', milestone: 'M4', slot: 'side', order: 15, component: AnimationPanel });
+panels.register({ id: 'audio', title: 'Audio', milestone: 'M4', slot: 'side', order: 16, component: AudioPanel });
+panels.register({ id: 'control', title: 'Control', milestone: 'M5', slot: 'side', order: 17, component: ControlPanel });
+panels.register({ id: 'dmx', title: 'DMX', milestone: 'M9', slot: 'side', order: 18, component: DmxPanel });
+panels.register({ id: 'media', title: 'Medios', milestone: 'M2', slot: 'side', order: 30, component: MediaPanel });
+panels.register({ id: 'notes', title: 'Notas', milestone: 'M2', slot: 'side', order: 40, component: NotesPanel });
+panels.register({ id: 'cliptime', title: 'Tiempo', milestone: 'M2', slot: 'side', order: 50, component: ClipTimePanel });
+panels.register({ id: 'preferences', title: 'Preferencias', milestone: 'M2', slot: 'side', order: 60, component: PreferencesPanel });
+
+export * from './paths';
+export * from './paths.extra';
+export * from './selection';
+export type { HostApi } from './host';

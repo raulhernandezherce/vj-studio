@@ -1,0 +1,12 @@
+# vj_module(nombre SOURCES ... [DEPS ...]) declara una biblioteca estática vj_<nombre>.
+function(vj_module name)
+  cmake_parse_arguments(ARG "" "" "SOURCES;DEPS" ${ARGN})
+  add_library(vj_${name} STATIC ${ARG_SOURCES})
+  target_include_directories(vj_${name} PUBLIC ${CMAKE_SOURCE_DIR}/engine)
+  target_link_libraries(vj_${name} PUBLIC ${ARG_DEPS})
+  if(MSVC)
+    target_compile_options(vj_${name} PRIVATE /W4)
+  else()
+    target_compile_options(vj_${name} PRIVATE -Wall -Wextra -Wpedantic)
+  endif()
+endfunction()
