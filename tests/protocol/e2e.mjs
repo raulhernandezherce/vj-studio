@@ -13,7 +13,9 @@ const docs = mkdtempSync(join(tmpdir(), 'vj-docs-'));
 const schema = JSON.parse(readFileSync(join(root, 'schemas/parameters.json'), 'utf8'));
 
 function start(args) {
-  const child = spawn(engine, [...args, '--port', '0', '--documents', docs, '--no-audio'], { stdio: ['ignore', 'pipe', 'inherit'] });
+  const child = spawn(engine, [...args, '--port', '0', '--documents', docs, '--no-audio'], { stdio: ['ignore', 'pipe', 'pipe'] });
+  let err = '';
+  child.stderr.on('data', (d) => { err += d; process.stderr.write(d); });
   return new Promise((resolve, reject) => {
     let out = '';
     child.stdout.on('data', (d) => {
@@ -21,7 +23,14 @@ function start(args) {
       const m = out.match(/VJENGINE_READY port=(\d+)/);
       if (m) resolve({ child, port: Number(m[1]) });
     });
-    child.on('exit', (c) => reject(new Error(`motor terminó con código ${c}`)));
+    child.on('exit', (c) => {
+      // Sin GPU (p. ej. los runners de GitHub) no hay contexto OpenGL: se omite, como las pruebas golden.
+      if (/no se pudo crear el contexto OpenGL/.test(err)) {
+        console.log('OMITIDA: sin contexto OpenGL 4.1 en esta máquina');
+        process.exit(77);
+      }
+      reject(new Error(`motor terminó con código ${c}`));
+    });
   });
 }
 

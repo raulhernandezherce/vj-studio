@@ -31,8 +31,26 @@ ctest --test-dir build --output-on-failure --timeout 180
 step "Pruebas de la interfaz"
 (cd ui && { [ -d node_modules ] || npm install --no-audit --no-fund; } && npx vitest run && npm run build)
 
+# Devuelve 77 si el motor no puede crear un contexto OpenGL (máquinas sin GPU, como los runners de GitHub).
+hay_opengl() {
+  node -e '
+    const c = require("child_process").spawn(process.argv[1], ["--port", "0", "--documents", require("os").tmpdir(), "--no-audio"]);
+    let e = "";
+    c.stderr.on("data", (d) => e += d);
+    c.stdout.on("data", (d) => { if (/VJENGINE_READY/.test(d)) { c.kill(); process.exit(0); } });
+    c.on("exit", () => process.exit(/contexto OpenGL/.test(e) ? 77 : 1));
+    setTimeout(() => { c.kill(); process.exit(1); }, 20000);
+  ' build/engine/app/vjengine
+}
+
 step "Programa real"
-node tests/smoke/run_smoke.mjs "$ROOT/ui/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron" .
+gl=0; hay_opengl || gl=$?
+if [ "$gl" -eq 77 ]; then
+  echo "OMITIDO: sin contexto OpenGL 4.1 en esta máquina (necesita GPU)"
+  if [ "${1:-}" = "--app" ]; then echo "--app necesita GPU para probar el instalador"; exit 1; fi
+else
+  node tests/smoke/run_smoke.mjs "$ROOT/ui/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron" .
+fi
 
 if [ "${1:-}" = "--app" ]; then
   step "Instalador"

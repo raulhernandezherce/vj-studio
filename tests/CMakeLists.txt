@@ -58,4 +58,5 @@ find_program(NODE node)
 if(NODE AND APPLE)
   add_test(NAME engine_e2e COMMAND ${NODE} ${CMAKE_CURRENT_SOURCE_DIR}/protocol/e2e.mjs
            $<TARGET_FILE:vjengine> $<TARGET_FILE:vj_make_fixture> ${VJ_FFGL_PLUGIN_DIR})
+  set_tests_properties(engine_e2e PROPERTIES SKIP_RETURN_CODE 77)
 endif()

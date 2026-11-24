@@ -22,10 +22,14 @@ if(VJ_BUILD_TESTS)
     DOWNLOAD_EXTRACT_TIMESTAMP TRUE)
   set(INSTALL_GTEST OFF CACHE INTERNAL "")
   set(gtest_force_shared_crt ON CACHE INTERNAL "")
+  FetchContent_MakeAvailable(googletest)
   # SDK oficial, solo para compilar plugins reales con los que probar el host.
-  FetchContent_Declare(ffgl_sdk
-    GIT_REPOSITORY https://github.com/resolume/ffgl.git
-    GIT_TAG 5b6e07840277df9ec35a228b9eb067636316350f)
-  set(FFGL_BUILD_EXAMPLE_PLUGINS OFF CACHE INTERNAL "")
-  FetchContent_MakeAvailable(googletest ffgl_sdk)
+  # En Windows no hay host FFGL (ver CMakeLists.txt) y el SDK exige GLEW: no se descarga.
+  if(NOT WIN32)
+    FetchContent_Declare(ffgl_sdk
+      GIT_REPOSITORY https://github.com/resolume/ffgl.git
+      GIT_TAG 5b6e07840277df9ec35a228b9eb067636316350f)
+    set(FFGL_BUILD_EXAMPLE_PLUGINS OFF CACHE INTERNAL "")
+    FetchContent_MakeAvailable(ffgl_sdk)
+  endif()
 endif()
