@@ -1,11 +1,13 @@
 // Salida y entrada con WASAPI y decodificación con Media Foundation. Equivale a CoreAudioDevice y AudioData.
+// mmdeviceapi.h va antes de functiondiscoverykeys_devpkey.h: con las cabeceras de Visual Studio
+// define DEFINE_PROPERTYKEY (las de MinGW/Zig no lo exigen). No reordenar alfabéticamente.
+#include <mmdeviceapi.h>
 #include <audioclient.h>
 #include <endpointvolume.h>
 #include <functiondiscoverykeys_devpkey.h>
 #include <mfapi.h>
 #include <mfidl.h>
 #include <mfreadwrite.h>
-#include <mmdeviceapi.h>
 
 #include <algorithm>
 #include <atomic>
