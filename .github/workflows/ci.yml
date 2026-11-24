@@ -19,6 +19,9 @@ jobs:
       - run: cmake --build build --config Release --parallel
       - run: npm ci
         working-directory: ui
+      # Asegura el binario de Electron (su postinstall no siempre se ejecuta en el runner).
+      - run: node node_modules/electron/install.js
+        working-directory: ui
       - run: npm test
         working-directory: ui
       - run: npm run build -w vjstudio
